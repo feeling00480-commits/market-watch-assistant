@@ -1,0 +1,10 @@
+AI-Analysis/
+UserData/
+Settings/
+Updates/
+Previous-Version/
+runtime.lock
+update-journal.json
+*.tmp
+*.part
+Market_Watch_Settings_*.json
