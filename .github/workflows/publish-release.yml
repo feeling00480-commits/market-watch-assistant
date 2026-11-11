@@ -1,0 +1,132 @@
+name: Publish verified Windows release
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [publish/current.json]
+permissions:
+  contents: write
+concurrency:
+  group: windows-release-publishing
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Verify package and publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY_RELEASE'
+          import base64
+          import hashlib
+          import io
+          import json
+          import os
+          import re
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+          import zipfile
+          
+          REPOSITORY = 'feeling00480-commits/market-watch-assistant'
+          FILES = {'Start-One-Click.cmd', 'Start-Market-Watch.cmd', 'Start-Server.ps1', 'Update-Manager.ps1', 'app.html', 'README.txt'}
+          
+          
+          def verify_package(manifest, package, version):
+              expected = 'Market_Watch_Assistant_Windows_v' + version + '.zip'
+              assert manifest['product'] == 'Market_Watch_Assistant_Windows'
+              assert manifest['schemaVersion'] == 1 and manifest['version'] == version
+              assert manifest['package'] == expected
+              assert re.fullmatch('[0-9a-f]{64}', manifest['sha256'])
+              assert hashlib.sha256(package).hexdigest() == manifest['sha256']
+              assert set(manifest['files']) == FILES and len(package) <= 16 * 1024 * 1024
+              with zipfile.ZipFile(io.BytesIO(package)) as archive:
+                  assert len(archive.infolist()) == len(FILES)
+                  seen = set()
+                  total = 0
+                  for entry in archive.infolist():
+                      parts = entry.filename.replace('\\', '/').split('/')
+                      assert len(parts) == 2 and parts[0] == 'Market_Watch_Assistant_Windows_v' + version
+                      name = parts[1]
+                      assert name in FILES and name not in seen
+                      assert (entry.external_attr >> 16) & 0o170000 != 0o120000
+                      seen.add(name)
+                      total += entry.file_size
+                      assert entry.file_size <= 8 * 1024 * 1024 and total <= 16 * 1024 * 1024
+                      assert hashlib.sha256(archive.read(entry)).hexdigest() == manifest['files'][name]
+                  assert seen == FILES
+          
+          
+          def main():
+              assert os.environ['GITHUB_REPOSITORY'] == REPOSITORY
+              token = os.environ['GH_TOKEN']
+              commit = os.environ['GITHUB_SHA']
+              assert re.fullmatch('[0-9a-f]{40}', commit)
+              base = 'https://api.github.com/repos/' + REPOSITORY
+          
+              def request(url, method='GET', data=None, content_type='application/json', missing_ok=False):
+                  target = urllib.parse.urlsplit(url)
+                  assert target.scheme == 'https' and target.hostname in {'api.github.com', 'uploads.github.com'}
+                  headers = {'Authorization': 'Bearer ' + token, 'User-Agent': 'market-watch-release-workflow', 'Accept': 'application/vnd.github+json'}
+                  if data is not None:
+                      headers['Content-Type'] = content_type
+                  try:
+                      with urllib.request.urlopen(urllib.request.Request(url, data=data, headers=headers, method=method), timeout=90) as response:
+                          return json.load(response)
+                  except urllib.error.HTTPError as error:
+                      if missing_ok and error.code == 404:
+                          return None
+                      raise RuntimeError('GitHub request failed with HTTP ' + str(error.code)) from None
+          
+              def file_at(path):
+                  assert '..' not in path and not path.startswith('/')
+                  info = request(base + '/contents/' + path + '?ref=' + commit)
+                  assert info['type'] == 'file' and info['size'] <= 16 * 1024 * 1024
+                  if info.get('encoding') != 'base64':
+                      info = request(base + '/git/blobs/' + info['sha'])
+                  assert info['encoding'] == 'base64' and info['size'] <= 16 * 1024 * 1024
+                  return base64.b64decode(info['content'], validate=False)
+          
+              control = json.loads(file_at('publish/current.json'))
+              version = control['version']
+              assert re.fullmatch(r'\d{1,3}\.\d{1,3}\.\d{1,5}', version)
+              folder = 'publish/v' + version + '/'
+              raw_manifest = file_at(folder + 'update.json')
+              manifest = json.loads(raw_manifest)
+              package = file_at(folder + 'Market_Watch_Assistant_Windows_v' + version + '.zip')
+              notes = file_at(folder + 'release-notes.md').decode('utf-8-sig')
+              verify_package(manifest, package, version)
+              assets = {
+                  manifest['package']: ('application/zip', package),
+                  'update.json': ('application/json', raw_manifest),
+                  'SHA256SUMS.txt': ('text/plain', (manifest['sha256'] + '  ' + manifest['package'] + '\n').encode()),
+              }
+              tag = 'v' + version
+              release = request(base + '/releases/tags/' + tag, missing_ok=True)
+              if release and not release['draft']:
+                  existing = {asset['name']: asset for asset in release['assets']}
+                  assert all(name in existing and existing[name].get('digest') == 'sha256:' + hashlib.sha256(value[1]).hexdigest() for name, value in assets.items()), 'Published release differs. Publish a new version instead.'
+                  print('Release already published and matches verified assets: ' + release['html_url'])
+                  return
+              if release is None:
+                  body = {'tag_name': tag, 'target_commitish': commit, 'name': '看盤小助手 ' + tag + '｜設定備份與自動更新', 'body': notes, 'draft': True, 'prerelease': False}
+                  release = request(base + '/releases', 'POST', json.dumps(body).encode())
+              existing = {asset['name']: asset for asset in release.get('assets', [])}
+              for name, (kind, content) in assets.items():
+                  digest = 'sha256:' + hashlib.sha256(content).hexdigest()
+                  if name in existing:
+                      assert existing[name].get('digest') == digest, 'Draft asset differs. Review it before publishing.'
+                      continue
+                  url = 'https://uploads.github.com/repos/' + REPOSITORY + '/releases/' + str(release['id']) + '/assets?name=' + urllib.parse.quote(name)
+                  uploaded = request(url, 'POST', content, kind)
+                  assert uploaded['name'] == name and uploaded.get('digest') == digest
+              result = request(base + '/releases/' + str(release['id']), 'PATCH', json.dumps({'draft': False, 'make_latest': 'true'}).encode())
+              assert result['tag_name'] == tag and not result['draft']
+              print('Published verified release: ' + result['html_url'])
+          
+          
+          if __name__ == '__main__':
+              main()
+          PY_RELEASE

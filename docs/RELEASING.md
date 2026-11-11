@@ -27,3 +27,9 @@
 ## 發版前檢查
 
 新版載入舊設定、還原備份、搜尋股票、圖表與 Windows 桌面警報都應先在 Windows 實測。自動更新機制不代表新版功能已通過所有情境驗證。
+
+## 倉庫自動發版工作流程
+
+倉庫已設置 `.github/workflows/publish-release.yml`。每版將 ZIP、update.json、release-notes.md 放在 `publish/v版本號/`，最後更新 `publish/current.json` 的 version。GitHub Actions 會先檢查 ZIP 與逐檔雜湊，再建立草稿、上傳附件，全部確認後發布正式 Release。
+
+也可進入 Actions → Publish verified Windows release → Run workflow，重試同一版。已發布且驗證資訊一致時會直接結束，不覆蓋既有正式版。更新發版只需要倉庫的內建 GITHUB_TOKEN，不需要把個人 Token 寫入倉庫。
