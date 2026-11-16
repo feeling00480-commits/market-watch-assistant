@@ -1,0 +1,15 @@
+{
+  "product": "Market_Watch_Assistant_Windows",
+  "schemaVersion": 1,
+  "version": "0.2.41",
+  "package": "Market_Watch_Assistant_Windows_v0.2.41.zip",
+  "sha256": "4bfb58802003acad0737d7598d1bacf10abec4cdb4f8a14132201c09f7c2b543",
+  "files": {
+    "Start-One-Click.cmd": "cfe39e1d738ccf6cda548b604ca3274ec0305924c1a45fc66774178e762c7b93",
+    "Start-Market-Watch.cmd": "949f85c7184f05a08e432fa5d4c32be4454576910b7a6c11772bd5531d10c595",
+    "Start-Server.ps1": "f6c01ac2655a0656e880828fe490e25d831704669393a2643954547871ccae49",
+    "Update-Manager.ps1": "69617e92606e93472f865b547c649dee4e12033e3eaee451aac63105fd7f2076",
+    "app.html": "a11800e0f63111292a3ea1c60ef14913a93226451311054c41fd8dd1206ca8f3",
+    "README.txt": "a58139993f4c603b91d9cd65ccde5751769beadb4b7050ea82a131781332ff34"
+  }
+}
