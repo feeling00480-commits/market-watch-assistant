@@ -32,6 +32,12 @@ v0.2.38 起，在「設定 → 備份與更新」可立即備份、匯出、匯�
 
 程式目前未做 Windows Authenticode 簽章。行情來源可能延遲、限流或缺漏，介面會標示資料時間與來源。條件提示用於研究與風險檢視，不保證交易結果。
 
+## v0.2.40 測試版
+
+[下載 Windows 測試 ZIP](https://github.com/feeling00480-commits/market-watch-assistant/raw/refs/heads/main/previews/v0.2.40/Market_Watch_Assistant_Windows_v0.2.40.zip) · [變更與限制](publish-v0240/release-notes.md) · [驗證紀錄](docs/VALIDATION-v0.2.40.md)
+
+各市場顯示 5／20／120 日觀察，新增期貨同契約條件與適用標的情境。AI 送出前整理新聞與現有資料，回覆包含彩色摘要、各期間推估與確認／失效條件；不捏造機率。仍屬測試包，未推送為自動更新正式版。原始碼在 v0240，重建執行 python3 tests/build-v0240.py。
+
 ## v0.2.39 測試版
 
 [下載 Windows 測試 ZIP](https://github.com/feeling00480-commits/market-watch-assistant/raw/refs/heads/main/previews/v0.2.39/Market_Watch_Assistant_Windows_v0.2.39.zip) · [變更與限制](publish-v0239/release-notes.md) · [驗證紀錄](docs/VALIDATION-v0.2.39.md)
