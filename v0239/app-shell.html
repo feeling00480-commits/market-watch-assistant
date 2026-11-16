@@ -1,0 +1,371 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>看盤小助手</title><style>
+html{background:#17181a}  body{margin:0} #cas-design{border-radius:0;border:0;min-height:100vh}
+#cas-design .position-table-wrap{overflow-x:auto}
+#cas-design .position-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+#cas-design .position-table th,#cas-design .position-table td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+#cas-design .position-table th:first-child{text-align:left}
+#cas-design .position-table thead th{font-size:12px;color:var(--quiet)}
+#cas-design .position-table tbody th{font-weight:600}
+#cas-design .position-table tbody tr:last-child>*{border-bottom:0}
+#cas-design .positions-graph{height:auto;max-height:180px}
+#cas-design .positions-graph text{fill:var(--quiet);font-size:13px}
+#cas-design .backup-path{overflow-wrap:anywhere;margin:8px 0}#cas-design .backup-preview{border:1px solid var(--accent);padding:12px;border-radius:9px;margin:12px 0}#cas-design .backup-preview strong{font-size:16px}#cas-design .dialog h3{margin-top:14px}#cas-design .dialog [role=status]{margin:8px 0;color:var(--amber)}
+
+#cas-design .instrument-code{font-size:13px;font-weight:500;color:var(--quiet);letter-spacing:0;margin-left:5px}
+#cas-design .outlook{padding:4px 0 15px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+#cas-design .outlook h3{font-size:16px}#cas-design .outlook-intro{color:var(--quiet);font-size:12px;margin:6px 0}
+#cas-design .outlook-caution{border-left:3px solid var(--amber);padding:5px 8px;margin:8px 0;font-size:12px;color:var(--amber);background:var(--paper)}
+#cas-design .outlook-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}
+#cas-design .outlook-card{padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--paper);min-width:0}
+#cas-design .outlook-card h4{font-size:15px;margin:0}#cas-design .outlook-card h4 small{font-size:11px;font-weight:500;color:var(--quiet)}
+#cas-design .outlook-verdict{font-weight:700;font-size:13px;line-height:1.5;min-height:40px;margin:7px 0}
+#cas-design .outlook-values{display:flex;gap:5px;justify-content:space-between;text-align:center}
+#cas-design .outlook-value{min-width:0;flex:1}#cas-design .outlook-value span{display:block;font-size:11px}#cas-design .outlook-value strong{font-size:22px;display:block;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+#cas-design .outlook .neutral{color:var(--quiet)}#cas-design .outlook-bar{display:flex;overflow:hidden;border-radius:5px;height:7px;margin:9px 0}
+#cas-design .outlook-bar .up{background:var(--red)}#cas-design .outlook-bar .down{background:var(--green)}#cas-design .outlook-bar .neutral{background:var(--quiet)}
+#cas-design .outlook-reading{font-size:12px;margin:7px 0}#cas-design .radar-title{font-size:14px;margin:3px 0 8px}
+#cas-design .outlook details{font-size:12px;margin-top:8px}#cas-design .outlook details p{margin:7px 0;overflow-wrap:anywhere}
+#cas-design .outlook summary,#cas-design .research-data-fold>summary{cursor:pointer;color:var(--accent);font-weight:650;padding:5px 0}
+#cas-design .research-data-fold{border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin:12px 0}
+#cas-design .research-data-fold[open]>summary{margin-bottom:5px}#cas-design .research-data-fold .research-evidence{margin:0}
+#cas-design .research-card{block-size:clamp(560px,66vh,720px)}
+@media(max-width:1100px){#cas-design .outlook-grid{grid-template-columns:1fr}#cas-design .outlook-card .outlook-verdict{min-height:0}#cas-design .outlook-value strong{font-size:24px}}
+</style></head><body><div id="cas-design" data-theme="dark">
+<style>
+#cas-design{color-scheme:dark;--ink:#e4e6e9;--quiet:#aeb3ba;--base:#17181a;--paper:#222427;--line:#393c40;--soft:#303338;--accent:#a8b8ce;--green:#88c6ae;--red:#e99cab;--amber:#e2bb88;--alert:#342e28;--action:#b5bfcd;--action-text:#20252b;font:var(--app-font,13px)/1.52 "Segoe UI","Microsoft JhengHei UI",system-ui,sans-serif;color:var(--ink);background:var(--base);border:1px solid var(--line);border-radius:17px;overflow:hidden;position:relative;isolation:isolate}
+#cas-design *{box-sizing:border-box}#cas-design [hidden]{display:none!important}#cas-design button,#cas-design input,#cas-design select{font:inherit;color:inherit}#cas-design button{border:1px solid var(--line);border-radius:8px;background:var(--paper);padding:7px 11px;min-height:34px;white-space:nowrap}#cas-design button:hover{background:var(--soft)}#cas-design button:disabled{opacity:.5}#cas-design button.primary{background:var(--action);color:var(--action-text);border-color:transparent}#cas-design button.clean{background:none;border-color:transparent}#cas-design button.clean:hover{background:var(--soft)}#cas-design button[aria-pressed=true]{background:var(--soft);color:var(--accent);border-color:transparent}#cas-design svg:not(.graph){vertical-align:middle;margin-right:5px;width:15px;height:15px}#cas-design h2,#cas-design h3,#cas-design p{margin:0}#cas-design .sub{color:var(--quiet);font-size:12px}#cas-design .up{color:var(--red)}#cas-design .down{color:var(--green)}#cas-design .num{font-variant-numeric:tabular-nums}#cas-design .row{display:flex;align-items:center;gap:8px}#cas-design .wrap{flex-wrap:wrap}#cas-design .between{justify-content:space-between}#cas-design .top{justify-content:flex-end;padding:8px 16px;background:var(--paper);border-bottom:1px solid var(--line)}#cas-design .layout{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(256px,1fr)}#cas-design main{padding:21px 20px 20px;min-width:0}#cas-design .rail{padding:21px 18px 20px;border-left:1px solid var(--line);background:var(--paper);min-width:0}#cas-design .eyebrow{letter-spacing:.13em;font-size:11px;font-weight:650;color:var(--quiet)}#cas-design .list{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 9px) / 2);gap:9px;margin:10px 0 16px;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x mandatory;scrollbar-width:thin;scrollbar-color:var(--line) transparent}#cas-design .tile{display:flex;background:var(--paper);border:1px solid var(--line);border-radius:12px;align-items:flex-start;min-width:0;position:relative;scroll-snap-align:start}#cas-design .tile.selected{border-color:var(--accent);background:var(--soft)}#cas-design .tile .pick{white-space:normal;flex:1;min-width:0;text-align:left;background:transparent;border:0;padding:10px 9px 10px 12px}#cas-design .tile .pick strong{display:block;font-size:14px}#cas-design .tile .pick .quote{display:flex;gap:6px;flex-wrap:wrap;align-items:baseline;margin-top:5px}#cas-design .tile .pick .quote b{font-size:17px}#cas-design .tile .more{min-width:32px;padding:4px 6px;margin:4px 3px 0 0}#cas-design .tile .more svg{margin:0}#cas-design .chart-card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}#cas-design .instrument{font-size:20px;letter-spacing:-.03em;font-weight:650}#cas-design .big{font-weight:650;letter-spacing:-.055em;font-size:clamp(24px,4.3vw,38px);line-height:1.22}#cas-design .switch{display:inline-flex;gap:2px;padding:3px;background:var(--base);border-radius:9px}#cas-design .switch button{background:transparent;border:0;padding:4px 8px;min-height:30px}#cas-design .switch button[aria-pressed=true]{background:var(--paper);box-shadow:0 1px 3px #0002}#cas-design .quote-head{gap:7px;align-items:end;margin-top:7px}#cas-design .quote-head .sub{margin-bottom:2px}#cas-design .graph{width:100%;height:176px;display:block;margin-top:10px;overflow:visible}#cas-design .ticks{display:flex;justify-content:space-between;padding-right:46px;margin:3px 0 13px}#cas-design .bottom{border-top:1px solid var(--line);padding-top:10px}#cas-design .status{border:1px solid var(--line);border-radius:11px;background:var(--base);padding:10px 11px;margin:13px 0}#cas-design .dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;flex:none}#cas-design .paused .dot{background:var(--quiet)}#cas-design .rail h2{font-size:17px;letter-spacing:-.03em}#cas-design .feed{margin:13px 0 0;padding:0;list-style:none}#cas-design .feed li{display:grid;grid-template-columns:39px 1fr;gap:8px;padding:9px 0;border-bottom:1px solid var(--line)}#cas-design .feed time{padding-top:3px;font-size:11px;color:var(--quiet)}#cas-design .event{min-width:0;padding:2px 0}#cas-design .event.alert{padding:8px 9px;border-radius:8px;background:var(--alert);color:var(--amber)}#cas-design .event b{display:block;margin-bottom:2px;font-weight:650}#cas-design .deck-nav{gap:3px}#cas-design .deck-nav button{padding:4px 8px;min-width:30px;font-size:15px}#cas-design .insight-tabs{margin:12px 0 8px;gap:3px;border-bottom:1px solid var(--line)}#cas-design .insight-tabs button{background:transparent;border:0;border-bottom:2px solid transparent;border-radius:0;padding:6px 11px}#cas-design .insight-tabs button[aria-pressed=true]{border-bottom-color:var(--accent);color:var(--accent)}#cas-design .insights{min-height:203px;padding:3px 0 9px}#cas-design .insight-head{margin:4px 0 6px}#cas-design .insight-row{border-bottom:1px solid var(--line);padding:7px 0}#cas-design .insight-row:last-child{border:0}#cas-design .insight-row b{display:block;font-weight:600}#cas-design .example{border-radius:20px;padding:2px 8px;background:var(--soft);color:var(--quiet);font-size:11px;white-space:nowrap}#cas-design .source-name{color:var(--accent)}#cas-design .testing{margin:9px 0 4px;border:1px solid var(--line);background:var(--base);border-radius:9px;padding:8px 10px}#cas-design .testing p{margin-bottom:6px}#cas-design .footer{border-top:1px solid var(--line);padding:8px 20px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}#cas-design .overlay{position:absolute;inset:0;display:grid;place-items:start center;padding:66px 12px 16px;background:#10121680;z-index:3}#cas-design .dialog{width:min(100%,470px);border-radius:14px;padding:19px;background:var(--paper);border:1px solid var(--line);box-shadow:0 18px 60px #1012163e}#cas-design .dialog h2{font-size:19px}#cas-design .dialog input:not([type=checkbox]),#cas-design .dialog select{width:100%;min-height:36px;background:var(--base);border:1px solid var(--line);border-radius:8px;padding:6px 9px}#cas-design .dialog label{display:block;margin-top:9px}#cas-design .dialog .fields{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}#cas-design .dialog .items{margin:10px 0;border-top:1px solid var(--line)}#cas-design .dialog .items>div{padding:6px 0;border-bottom:1px solid var(--line)}
+@media(max-width:690px){#cas-design .top{padding-right:16px}#cas-design .layout{grid-template-columns:1fr}#cas-design .rail{border-left:0;border-top:1px solid var(--line)}#cas-design main,#cas-design .rail{padding:15px}#cas-design .top>.row{gap:4px}#cas-design .graph{height:155px}}
+@media(max-width:380px){#cas-design .top{flex-wrap:wrap}#cas-design .chart-card{padding:11px}#cas-design .list{gap:5px;grid-auto-columns:calc((100% - 5px) / 2)}#cas-design .tile .pick{padding-left:7px}}
+
+#cas-design .layout{grid-template-columns:minmax(143px,.72fr) minmax(0,2.35fr) minmax(212px,1.04fr)}
+#cas-design .watch-rail{padding:17px 11px;background:var(--paper);border-right:1px solid var(--line);min-width:0}
+#cas-design .watch-heading{display:flex;align-items:center;justify-content:space-between;gap:4px;padding:0 3px;margin-bottom:10px}
+#cas-design .watch-heading h2{font-size:14px;font-weight:650;white-space:nowrap}
+#cas-design .watch-add{width:100%;text-align:left}
+#cas-design .watch-rail .list{display:flex;flex-direction:column;gap:7px;margin:12px 0 0;overflow:visible;scroll-snap-type:none}
+#cas-design .watch-rail .tile .pick{padding:8px 3px 8px 9px}
+#cas-design .watch-rail .tile .pick .quote{gap:4px}
+#cas-design .watch-rail .tile .pick .quote b{font-size:14px}
+#cas-design .watch-rail .tile .pick .quote span{font-size:11px}
+#cas-design .watch-rail .tile .more{min-width:24px;padding:3px 4px;margin-right:2px}
+#cas-design main{padding:17px 13px}
+#cas-design .rail{padding:17px 12px}
+#cas-design .chart-card{min-height:377px}
+#cas-design .graph{height:205px}
+#cas-design .insights{min-height:230px}
+@media(max-width:685px){
+ #cas-design .layout{grid-template-columns:minmax(126px,1fr) minmax(0,3fr)}
+ #cas-design .rail{grid-column:1/-1;border-left:0;border-top:1px solid var(--line)}
+ #cas-design .watch-rail{padding:15px 8px}
+}
+@media(max-width:460px){
+ #cas-design .layout{grid-template-columns:1fr}
+ #cas-design .watch-rail{border-right:0;border-bottom:1px solid var(--line);padding:12px 14px}
+ #cas-design .watch-add{width:auto}
+ #cas-design .watch-rail .list{display:grid;grid-auto-flow:row;grid-template-columns:repeat(2,minmax(0,1fr))}
+ #cas-design .graph{height:165px}
+}
+
+#cas-design .watch-rail .tile .quote{gap:0;line-height:1.35}
+#cas-design .watch-rail .tile .quote b{font-size:13px}
+#cas-design .watch-rail .tile .quote span{white-space:nowrap}
+#cas-design .quote-dot{display:inline-block;width:7px;height:7px;margin:0 5px 1px 0;border-radius:50%;background:var(--quiet)}
+#cas-design .quote-dot.up{background:var(--green)}
+#cas-design .quote-dot.down{background:var(--red)}
+#cas-design .brief{display:block;font-size:11px;line-height:1.3;margin-top:4px}
+#cas-design .brief.flag{font-weight:600;color:var(--amber)}
+
+#cas-design .event .reason{margin-top:3px;font-weight:600}
+
+#cas-design .feed .event-link{display:block;white-space:normal;text-align:left;padding:0;min-height:0;font-weight:650;margin-bottom:2px}
+#cas-design .feed p{white-space:pre-wrap;overflow-wrap:anywhere}
+#cas-design .insight-row a{color:var(--accent);font-weight:650;text-decoration:none;overflow-wrap:anywhere}
+#cas-design .insight-row a:hover{text-decoration:underline}
+#cas-design .dialog-actions{margin-top:14px}
+#cas-design .overlay{z-index:8;position:fixed;overflow:auto;padding-top:clamp(12px,5vh,55px)}
+#cas-design .search-results{max-height:310px;overflow:auto}
+#cas-design .ai-output{white-space:pre-wrap;max-height:320px;overflow:auto;margin-top:12px}
+#cas-design .rail-actions{margin:10px 0 0}
+#cas-design .graph{min-width:0}
+
+#cas-design .watch-tools{display:block;margin-top:8px}
+#cas-design .watch-tools select{width:100%;padding:5px;background:var(--paper);border:1px solid var(--line);border-radius:7px}
+#cas-design .quote-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(83px,1fr));gap:6px;margin:8px 0}
+#cas-design .quote-stats div{background:var(--base);border-radius:8px;padding:6px 8px}
+#cas-design .quote-stats small,#cas-design .quote-stats b{display:block}
+#cas-design .chart-tools{justify-content:space-between;margin-top:6px}
+#cas-design .chart-detail{min-height:18px;margin-top:6px}
+#cas-design .book{width:100%;border-collapse:collapse;font-size:12px;margin:4px 0 10px}
+#cas-design .book th,#cas-design .book td{text-align:right;padding:4px 6px;border-bottom:1px solid var(--line)}
+#cas-design .book caption{text-align:left;font-weight:650;margin-bottom:4px}
+#cas-design{
+ --candle-up:#ff4964;
+ --candle-down:#28da99;
+ --up-bg:#542131;--up-ink:#ffd5de;
+ --down-bg:#173f34;--down-ink:#c0ffe4;
+}
+#cas-design .quote-dot.up{background:var(--candle-up)}
+#cas-design .quote-dot.down{background:var(--candle-down)}
+#cas-design .brief.flag{display:table;padding:3px 5px;border-radius:4px;background:var(--alert)}
+#cas-design .event.alert{border-left:3px solid var(--amber)}
+#cas-design :is(.brief.flag,.event.alert).rising{background:var(--up-bg);border-color:var(--candle-up)}
+#cas-design :is(.brief.flag,.event.alert).falling{background:var(--down-bg);border-color:var(--candle-down)}
+#cas-design :is(.brief.flag.rising,.event.alert.rising :is(b,p,button)){color:var(--up-ink) !important}
+#cas-design :is(.brief.flag.falling,.event.alert.falling :is(b,p,button)){color:var(--down-ink) !important}
+#cas-design .event.alert button:hover{background:transparent;text-decoration:underline}
+#cas-design{--base:#141517;--paper:#202124;--soft:#2d3036;--line:#3a3d43;--quiet:#b5bbc5}
+#cas-design .graph{height:295px;background:var(--chart-bg,#17181b);border-radius:7px}
+#cas-design .layout{grid-template-columns:minmax(172px,.78fr) minmax(0,2.7fr) minmax(235px,1.08fr)}
+#cas-design .watch-summary{display:block;margin-top:5px;font-size:calc(var(--app-font,13px) - 1px);line-height:1.45;color:var(--quiet);white-space:normal;overflow-wrap:anywhere}
+#cas-design .watch-summary.attention{color:#f1c57c}
+#cas-design .watch-rail .tile .pick{padding-bottom:9px}
+#cas-design .feed{max-height:78vh;overflow:auto;scrollbar-color:var(--line) transparent}
+#cas-design .feed li{grid-template-columns:52px 1fr}
+#cas-design .feed .event-status{font-size:11px;color:#d8bc81}
+#cas-design .ma-legend:not(:empty){margin-top:4px}
+#cas-design .chart-tools{margin-top:9px}
+#cas-design{--cursor-line:var(--accent)}
+#cas-design .graph[data-el=chart]{cursor:crosshair;touch-action:pan-y;user-select:none}
+#cas-design [data-el=indicatorPanel]{touch-action:pan-y;user-select:none}
+#cas-design .graph[data-el=chart].is-panning{cursor:grabbing}
+#cas-design .ticks{display:block;position:relative;min-height:18px;padding-right:0}
+#cas-design .ticks span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+#cas-design .chart-marker{pointer-events:none}
+#cas-design .chart-marker rect{fill:var(--action)}
+#cas-design .chart-marker text{fill:var(--action-text);text-anchor:middle;dominant-baseline:central;font-size:11px;font-weight:700}
+#cas-design button.chart-reset{margin-left:auto}
+#cas-design .data-review{margin:6px 0 7px;padding:7px 10px;border:1px solid var(--line);border-inline-start:3px solid currentColor;border-radius:6px;background:var(--soft);font-size:1.06em;font-weight:700;line-height:1.4}
+#cas-design .data-review.neutral{color:var(--quiet)}
+#cas-design .indicator .data-review{margin-bottom:4px}
+#cas-design .data-table{overflow-x:auto}
+#cas-design .data-table .book{min-width:400px}
+#cas-design .data-table .book :is(th,td){white-space:nowrap}
+#cas-design .flow-chart{height:172px}
+#cas-design .flow-chart text{fill:var(--quiet);font-size:12px}
+#cas-design .data-legend{margin-top:8px}
+#cas-design .data-legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px}
+#cas-design .lower-panel{margin-top:16px;border-top:1px solid var(--line);container-type:inline-size}
+#cas-design .lower-panel .insight-tabs{margin:6px 0 9px}
+#cas-design .lower-panel .insights{min-height:0}
+#cas-design .lower-panel .quote-stats{grid-template-columns:repeat(auto-fit,minmax(100px,1fr))}
+#cas-design .indicators{margin:4px 0 9px}
+#cas-design .indicator{border-top:1px solid var(--line);padding:6px 0 2px;font-size:11px}
+#cas-design .indicator svg{display:block;width:100%;height:auto;max-height:76px;margin:0}
+#cas-design .radar-board{margin:0 0 5px;padding:0 0 4px;text-align:center}
+#cas-design .radar-layout{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,148px),1fr));gap:8px;align-items:start}
+#cas-design .radar-signals{display:grid;gap:6px;padding-top:5px}
+#cas-design .signal-list{padding:6px 8px;border-radius:6px;background:var(--paper);border:1px solid var(--line)}
+#cas-design .signal-list ul{margin:4px 0 0;padding-inline-start:15px;line-height:1.4;font-size:.94em}
+#cas-design .insights .radar{display:block;width:100%;max-width:clamp(220px,34vh,300px);height:auto;margin:0 auto}
+#cas-design .radar-axis{cursor:pointer}
+#cas-design .radar-axis rect{fill:transparent;stroke:transparent}
+#cas-design .radar-axis:hover rect,#cas-design .radar-axis[aria-pressed=true] rect{fill:var(--soft)}
+#cas-design .radar-axis:focus-visible{outline:none}
+#cas-design .radar-axis:focus-visible rect{stroke:var(--accent)}
+#cas-design .radar-description{min-height:2.8em;line-height:1.4}
+#cas-design .radar-description b{color:var(--ink)}
+#cas-design .research-evidence{padding:3px 0 6px;text-align:left}
+#cas-design .research-evidence p+p{margin-top:2px}
+#cas-design .technical-mood{font-size:1.3em;font-weight:750;line-height:1.3;padding:4px 9px;border-radius:8px;background:var(--soft);color:var(--ink)}
+#cas-design .technical-mood.up{color:var(--red)}
+#cas-design .technical-mood.down{color:var(--green)}
+#cas-design .radar-notes{margin-top:4px;color:var(--quiet)}
+#cas-design .radar-notes summary{cursor:pointer;color:var(--accent)}
+#cas-design .radar-notes ul{padding-inline-start:19px}
+#cas-design .research-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;width:100%}
+#cas-design .research-card{box-sizing:border-box;display:flex;flex-direction:column;min-width:0;block-size:clamp(420px,61vh,560px);padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:var(--base)}
+#cas-design .research-card .insight-head{flex:none;min-height:36px;margin:0 0 6px;align-content:center}
+#cas-design .research-body{flex:1 1 0;min-height:0;overflow:auto;overflow-wrap:anywhere;overscroll-behavior:contain;scrollbar-gutter:stable;scrollbar-color:var(--line) transparent}
+#cas-design .research-market .insight-row{padding-block:6px}
+#cas-design .future-emphasis{font-weight:750}
+#cas-design .taiwan-research .insight-row:first-child{padding:8px 10px;margin-bottom:4px;background:var(--soft);border:1px solid var(--line);border-inline-start:3px solid var(--accent);border-radius:6px}
+#cas-design .taiwan-research .insight-row:first-child>b{margin-bottom:3px}
+#cas-design .future-emphasis.caution{color:var(--amber)}
+#cas-design .future-position-note{margin:5px 0;line-height:1.45}
+#cas-design .research-body:focus-visible{outline:1px solid var(--accent);outline-offset:-1px}
+#cas-design .ai-history-controls{flex:none;margin:0 0 7px}
+#cas-design .ai-history-controls label{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+#cas-design .ai-history-controls select{border:1px solid var(--line);border-radius:7px;padding:5px 7px;background:var(--paper);max-width:100%}
+#cas-design .research-ai .ai-empty{padding:14px 0;color:var(--quiet)}
+#cas-design .factor-row{margin:6px 0 8px}
+#cas-design .factor{display:inline-block;padding:3px 7px;border:1px solid var(--line);border-radius:5px}
+#cas-design .research-positive,#cas-design .factor.positive{color:#8de4bd}
+#cas-design .research-risk,#cas-design .factor.risk{color:#ffacae}
+#cas-design .factor.positive{background:#1a352e;border-color:#34564a}
+#cas-design .factor.risk{background:#3b242a;border-color:#603b45}
+#cas-design .position-plan p{margin-top:6px}
+#cas-design .dialog .portfolio-optin{padding:6px 0;font-weight:700;color:var(--accent)}
+#cas-design .ai-report{line-height:1.6}
+#cas-design .ai-report h4{margin:12px 0 6px;padding:5px 7px;border-left:3px solid var(--accent);background:var(--paper);color:var(--ink)}
+#cas-design .ai-report .report-positive{background:#1a352e;border-color:#7fd8ac;color:#abf3ce}
+#cas-design .ai-report .report-risk{background:#3b242a;border-color:#f1979d;color:#ffc1c3}
+#cas-design .ai-report strong{color:#ffdc96}
+#cas-design .ai-report p{margin:6px 0}
+#cas-design .ai-report ul{margin:5px 0 10px;padding-left:20px}
+#cas-design .ai-report li{margin:4px 0}
+@container (max-width:590px){#cas-design .research-columns{grid-template-columns:1fr}}
+#cas-design .api-guide{margin:10px 0;padding:9px 10px;border-radius:8px;background:var(--base)}
+#cas-design .api-guide a,#cas-design .ai-web{color:#acc7ff;text-underline-offset:3px}
+#cas-design .ai-guide-note{display:block;margin-top:4px}
+#cas-design .ai-copy-fallback{width:100%;min-height:130px;margin-top:8px;padding:7px;color:var(--ink);background:var(--base);border:1px solid var(--line);border-radius:6px}
+#cas-design .ai-result{border-top:1px solid var(--line);padding:8px 0 0;margin:0;overflow-wrap:anywhere}
+@media(max-width:800px){#cas-design .layout{grid-template-columns:minmax(150px,1fr) minmax(0,3fr)}#cas-design .rail{grid-column:1/-1}}
+@media(max-width:520px){#cas-design .layout{grid-template-columns:1fr}#cas-design .graph{height:235px}}
+#cas-design .sub{font-size:calc(var(--app-font,13px) - 1px)}
+#cas-design :is(.watch-heading h2,.watch-rail .tile .pick .quote b){font-size:var(--app-font,13px)}
+#cas-design .watch-rail .tile .pick .quote span{font-size:calc(var(--app-font,13px) - 2px)}
+#cas-design .watch-rail .tile .pick strong{font-size:calc(var(--app-font,13px) + 1px)}
+#cas-design .appearance-entry{margin:10px 0 15px;padding:10px;border:1px solid var(--line);border-radius:9px}
+#cas-design .appearance-group{border:1px solid var(--line);border-radius:10px;margin:10px 0;padding:0 10px}
+#cas-design .appearance-group .appearance-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;min-height:43px;margin:0;padding:6px 0}
+#cas-design .appearance-row+.appearance-row{border-top:1px solid var(--line)}
+#cas-design .appearance-row .appearance-color{display:flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums}
+#cas-design .dialog .appearance-row :is(select,input){width:auto;min-height:28px;max-width:100%}
+#cas-design .dialog .appearance-row input[type=color]{width:42px;padding:2px 4px}
+#cas-design .dialog .appearance-row input[type=number]{width:67px}
+#cas-design .dialog .appearance-row input[type=range]{width:110px;padding:0;accent-color:var(--accent)}
+#cas-design .appearance-preview{border:1px solid var(--line);border-radius:9px;background:var(--paper);color:var(--ink);padding:9px 12px;margin-bottom:7px;font-size:var(--app-font,13px)}
+#cas-design .appearance-preview p{color:var(--quiet)}
+#cas-design .appearance-preview span{color:var(--accent)}
+
+@media(min-width:801px){
+ #cas-design .monitor-column{grid-column:3;min-width:0;background:var(--paper);border-inline-start:1px solid var(--line)}
+ #cas-design .monitor-column>.top{border:0;background:transparent}
+ #cas-design .monitor-column>.rail{border-inline-start:0;background:transparent}
+}
+@media(max-width:800px){
+ #cas-design .monitor-column{display:contents}
+ #cas-design .monitor-column>.top{grid-row:1;grid-column:1/-1}
+}
+#cas-design .chart-body{display:grid;grid-template-columns:minmax(0,1fr);align-items:start}
+#cas-design .chart-body:has(.trade-sides:not([hidden])){grid-template-columns:minmax(0,1fr) clamp(178px,23%,245px);gap:12px}
+#cas-design .trade-sides{margin-top:10px;padding:12px;background:var(--base);border:1px solid var(--line);border-radius:10px}
+#cas-design .trade-sides h3{font-size:1em}
+#cas-design .trade-pair{display:flex;justify-content:space-between;gap:8px;margin:10px 0}
+#cas-design .trade-pair div:last-child{text-align:right}
+#cas-design .trade-pair dd{margin:0;font-weight:650}
+#cas-design .trade-pair dd:last-child{font-weight:400}
+#cas-design .trade-split{display:flex;gap:2px;height:8px;border-radius:4px;overflow:hidden;margin-bottom:9px}
+#cas-design .trade-split span{min-width:0;background:var(--candle-down,#51c69a)}
+#cas-design .trade-split span:last-child{background:var(--candle-up,#fa637a)}
+#cas-design .trade-sides .data-review{font-size:1em}
+#cas-design .trade-guide{margin-top:8px}
+#cas-design .trade-guide summary{cursor:pointer}
+#cas-design .trade-guide p{margin-top:4px}
+@media(max-width:1050px){
+ #cas-design .chart-body:has(.trade-sides:not([hidden])){grid-template-columns:minmax(0,1fr);gap:0}
+ #cas-design .trade-sides{margin:0 0 8px}
+}
+#cas-design .price-profile{margin:10px 0 14px}
+#cas-design .profile-tools{margin:0 0 8px}
+#cas-design .profile-import{display:grid;gap:3px}
+#cas-design .profile-import input{max-width:240px}
+#cas-design .profile-help{margin:6px 0}
+#cas-design .profile-help a{color:var(--accent)}
+#cas-design .profile-board{position:relative;isolation:isolate;container-type:inline-size;height:var(--main-chart-height);background:var(--chart-bg,#17181b);border-radius:8px;overflow:hidden}
+#cas-design .profile-plot{position:absolute;inset:0 43% 0 0}
+#cas-design .profile-band{position:absolute;left:0;right:0}
+#cas-design .profile-band:hover,#cas-design .profile-band:focus-visible{background:var(--soft);outline-offset:-2px}
+#cas-design .profile-axis{position:absolute;top:50%;left:0;width:17%;text-align:right;transform:translateY(-50%);color:var(--quiet);font-size:clamp(8px,1.7cqw,12px);font-variant-numeric:tabular-nums}
+#cas-design .profile-bar{position:absolute;left:19%;top:9%;height:82%;min-width:0;border-radius:2px;background:var(--accent)}
+#cas-design .profile-bar.profile-peak{background:var(--amber)}
+#cas-design .profile-connectors.graph{position:absolute;inset:0;width:100%;height:100%;margin:0;background:none;pointer-events:none}
+#cas-design .profile-connectors path{fill:none;stroke:var(--quiet);stroke-width:1.1;vector-effect:non-scaling-stroke;stroke-dasharray:4 4;opacity:.75}
+#cas-design .profile-connectors .profile-latest{stroke:var(--ink);opacity:1}
+#cas-design .profile-connectors .profile-peak{stroke:var(--amber)}
+#cas-design .profile-connectors .profile-pressure{stroke:var(--red)}
+#cas-design .profile-connectors .profile-support{stroke:var(--green)}
+#cas-design .profile-side{position:absolute;inset:0 0 0 61%;pointer-events:none}
+#cas-design .profile-verdict{padding:9px 9px 0 0;font-size:clamp(12px,3.1cqw,19px);font-weight:800;line-height:1.26;overflow-wrap:anywhere}
+#cas-design .profile-marker{position:absolute;left:0;right:5px;transform:translateY(-50%);line-height:1.13;font-size:clamp(10px,2.45cqw,14px);color:var(--quiet)}
+#cas-design .profile-marker span{display:block;font-weight:600}
+#cas-design .profile-marker b{color:var(--ink);font-size:clamp(12px,2.7cqw,17px);font-variant-numeric:tabular-nums}
+#cas-design .profile-marker small{margin-left:4px;white-space:nowrap}
+#cas-design .profile-marker.profile-peak b{color:var(--amber)}
+#cas-design .profile-caption{margin-top:4px;gap:4px}
+#cas-design .profile-caption .sub{flex:1 1 220px}
+#cas-design .profile-zoom button{min-height:23px;padding:2px 7px;font-size:12px}
+#cas-design .price-profile details{margin:3px 0;color:var(--quiet)}
+#cas-design .price-profile .data-table{max-height:220px;overflow:auto}
+#cas-design{--main-chart-height:295px}
+#cas-design .graph[data-el=chart]{height:var(--main-chart-height)}
+@media(max-width:520px){#cas-design{--main-chart-height:235px}}
+#cas-design .watch-actions{display:flex;align-items:center;flex:none;padding:3px 4px 0 0}
+#cas-design .tile .watch-actions button{min-width:27px;min-height:31px;margin:0;padding:3px 4px;color:var(--quiet)}
+#cas-design .tile .watch-actions .watch-pin[aria-pressed=true]{color:var(--amber)}
+#cas-design .watch-pin svg{margin:0;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linejoin:round}
+#cas-design .watch-pin[aria-pressed=true] svg{fill:currentColor}
+#cas-design .tile .watch-grip{cursor:grab;color:var(--quiet);padding:0 4px 0 6px;margin:3px 0 0;min-width:20px;min-height:30px}
+#cas-design .watch-grip+.pick{padding-left:5px}
+#cas-design .watch-dragging{opacity:.55}
+#cas-design .watch-drop-before{box-shadow:0 -3px 0 var(--accent)}
+#cas-design .watch-drop-after{box-shadow:0 3px 0 var(--accent)}
+#cas-design [data-el=watchSortHint]{margin-top:4px}
+#cas-design .mode-badge{border:1px solid var(--line);border-radius:100px;padding:3px 8px;font-size:.8em;color:var(--mode-accent,var(--accent));font-weight:650;white-space:nowrap}
+#cas-design [data-mode=futures]{--mode-accent:#a9c5eb}
+#cas-design [data-mode=us]{--mode-accent:#c6b7ed}
+#cas-design [data-mode=esb]{--mode-accent:#e6c694}
+#cas-design .mode-summary{margin:9px 0}
+#cas-design .mode-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(142px,1fr));gap:6px}
+#cas-design .mode-stat{min-width:0;min-height:65px;border:1px solid var(--line);border-top:2px solid var(--mode-accent);background:var(--chart-bg,#17181b);padding:6px 8px;border-radius:7px}
+#cas-design .mode-stat span,#cas-design .mode-stat small{display:block;color:var(--quiet);font-size:.82em;line-height:1.4}
+#cas-design .mode-stat b{display:block;font-size:1.08em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+#cas-design .mode-actions{margin-top:6px}
+#cas-design .mode-actions>button{margin-left:auto;font-size:.88em;min-height:31px}
+#cas-design{display:flex;flex-direction:column}
+#cas-design .layout{flex:1 0 auto}
+#cas-design .app-version{margin-inline-start:auto;color:var(--ink);font-weight:650;white-space:nowrap}
+</style>
+<p class="status" data-el="startHint" role="status" hidden>請先解壓縮完整資料夾，再雙擊 Start-Market-Watch.cmd。這個頁面需要本機服務才能取得行情。</p>
+<div class="layout">
+<nav class="watch-rail" aria-label="追蹤清單">
+  <div class="watch-heading"><h2>我的追蹤</h2><span class="sub num" data-el="count"></span></div>
+  <button class="watch-add" data-act="add">＋ 加入股票</button>
+  <label class="sub watch-tools">排序<select data-el="watchSort"><option value="default">加入順序</option><option value="custom">自訂排序</option><option value="up">漲幅優先</option><option value="down">跌幅優先</option></select></label>
+  <p class="sub" data-el="watchSortHint" hidden>拖曳 ⠿ 或按上下鍵調整順序。釘選項目固定在上方。</p>
+  <div class="list" data-el="watch" aria-label="追蹤商品"></div>
+</nav>
+<main aria-label="商品數據">
+  <div class="chart-card" data-el="detail">
+    <div class="row between wrap"><div><div class="row wrap"><h2 class="instrument" data-el="name"></h2><span class="mode-badge" data-el="marketMode" hidden></span></div><p class="sub" data-el="market"></p></div><div class="switch wrap" aria-label="圖表週期"><button data-act="period" data-id="line" aria-pressed="true">走勢圖</button><button data-act="period" data-id="1m" aria-pressed="false">1 分 K</button><button data-act="period" data-id="5m" aria-pressed="false">5 分 K</button><button data-act="period" data-id="30m" aria-pressed="false">30 分 K</button><button data-act="period" data-id="60m" aria-pressed="false">60 分 K</button><button data-act="period" data-id="day" aria-pressed="false">日 K</button><button data-act="period" data-id="week" aria-pressed="false">週 K</button><button data-act="period" data-id="month" aria-pressed="false">月 K</button><button data-act="period" data-id="profile" aria-pressed="false">分價圖</button></div></div>
+    <div class="row quote-head wrap num"><span class="big" data-el="price"></span><span data-el="change"></span><span class="sub" data-el="quoteTime"></span></div>
+    <section class="mode-summary" data-el="modeSummary" aria-label="商品專屬行情" hidden></section>
+    <section data-el="quotePanel" aria-label="走勢與成交量"><div data-el="chartReview"></div><div class="row wrap chart-tools"><label data-el="movingAverageControl" hidden><input type="checkbox" data-el="movingAverage" checked> 均線</label><div class="switch" data-el="chartRange" aria-label="圖表範圍" hidden><button data-act="range" data-id="1" title="1 個月">1M</button><button data-act="range" data-id="3" title="1 季">3M</button><button data-act="range" data-id="6" title="半年">6M</button><button data-act="range" data-id="12" title="1 年">1Y</button></div><button class="chart-reset" data-act="chartReset" data-el="chartReset" hidden>重設視圖</button></div><p class="sub" data-el="chartSource"></p><div class="row wrap ma-legend sub" data-el="maLegend"></div><div class="chart-detail sub num" data-el="chartDetail" aria-live="off"></div><div class="chart-body"><div class="chart-plot"><svg class="graph" role="img" aria-label="行情走勢圖，按住左右拖曳可平移，滾輪可縮放時間軸" data-el="chart"></svg>
+    <div class="ticks sub num" data-el="ticks"></div></div><aside class="trade-sides" data-el="tradeSides" aria-label="內外盤成交" hidden></aside></div></section>
+    <section class="price-profile" data-el="priceProfile" aria-label="分價圖" hidden></section>
+    <section class="lower-panel" aria-label="圖表下方的個股資訊">
+      <div class="row insight-tabs wrap" aria-label="個股資訊">
+        <button data-act="research" aria-pressed="true">分析</button>
+        <button data-act="news" aria-pressed="false">新聞</button>
+        <button data-act="quotes" aria-pressed="false">行情明細</button>
+        <button data-act="chips" aria-pressed="false">籌碼</button>
+        <button data-act="financial" aria-pressed="false">財務</button>
+        <button data-act="positions" aria-pressed="false" hidden>盤後部位</button>
+      </div>
+      <div class="insights" data-el="insights"></div>
+      <div data-el="quoteDetails" hidden>
+        <div class="quote-stats" data-el="quoteStats"></div>
+        <div class="row wrap sub indicators" data-el="indicatorControls" hidden><label><input type="checkbox" data-el="showKD" checked> KD</label><label><input type="checkbox" data-el="showMACD" checked> MACD</label><label><input type="checkbox" data-el="showRSI"> RSI</label></div>
+        <div data-el="indicatorPanel"></div><div data-el="orderBook"></div><div data-el="extraDetails"></div>
+      </div>
+    </section>
+    <div class="bottom row between wrap"><span class="sub" data-el="summary"></span><div class="row wrap"><button data-act="rule">設定警報</button></div></div>
+  </div>
+  <div class="chart-card" data-el="empty" hidden><h2 class="instrument">追蹤清單是空的</h2><p class="sub">從「加入股票」選擇指數、期貨或個股。</p></div>
+</main>
+<div class="monitor-column">
+<header class="top row">
+  <div class="row"><button class="primary" data-act="toggle">暫停監控</button><button class="clean" data-act="settings">設定</button></div>
+</header>
+<aside class="rail" aria-label="監控動態">
+  <div class="row between wrap"><h2>監控動態</h2><span class="sub">詳細 · 台北時間</span></div>
+  <div class="status" data-el="status"><div class="row between wrap"><span class="row"><span class="dot"></span><strong data-el="statusText">監控中</strong></span><span class="sub" data-el="poll">每 5 分鐘</span></div><p class="sub num" data-el="last">上次更新 10:35　下一輪 10:40</p></div>
+  <div class="switch" aria-label="篩選動態"><button data-act="all" aria-pressed="true">全部動態</button><button data-act="alerts" aria-pressed="false">只看警報</button></div>
+  <div class="row wrap rail-actions"><button data-act="refresh">更新行情</button><button data-act="snapshot">手動快照</button></div>
+  <ul class="feed" data-el="feed" aria-live="off"></ul>
+</aside>
+</div>
+</div>
+<footer class="footer sub row between"><span>看盤小助手 · 公開行情可能延遲</span><span class="app-version num">目前版本 v0.2.39</span></footer>
+<div class="overlay" data-el="overlay" hidden><section class="dialog" role="dialog" aria-modal="true" aria-label="看盤小助手設定" data-el="dialog"></section></div>
+</div>

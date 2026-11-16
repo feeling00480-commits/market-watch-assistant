@@ -31,3 +31,9 @@ v0.2.38 起，在「設定 → 備份與更新」可立即備份、匯出、匯�
 每個正式 Release 同時附上程式 ZIP、`update.json` 與 `SHA256SUMS.txt`。請下載作者上傳的 Windows ZIP，GitHub 自動產生的 Source code 壓縮檔不是可直接啟動的程式包。
 
 程式目前未做 Windows Authenticode 簽章。行情來源可能延遲、限流或缺漏，介面會標示資料時間與來源。條件提示用於研究與風險檢視，不保證交易結果。
+
+## v0.2.39 測試版
+
+[下載 Windows 測試 ZIP](https://github.com/feeling00480-commits/market-watch-assistant/raw/refs/heads/main/previews/v0.2.39/Market_Watch_Assistant_Windows_v0.2.39.zip) · [變更與限制](publish-v0239/release-notes.md) · [驗證紀錄](docs/VALIDATION-v0.2.39.md)
+
+新增名稱旁代號、預設收折數據，以及 5／20／120 交易日歷史類比統計。盤中有效新價格會重新比對，尚未校準為預測機率。基於 v0.2.38；不含另行修改的 PC 共用快取／每日共用 AI 服務。本測試版未列為 Releases latest，不會自動推送。原始碼在 `v0239`，可執行 `python3 tests/build-v0239.py` 重建六檔 ZIP。
